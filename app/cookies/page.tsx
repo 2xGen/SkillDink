@@ -59,7 +59,8 @@ export default function CookiesPage() {
           is a file or a meta tag for the search engine, not a tracker in your account.
         </p>
         <p className="mt-3">
-          The site does not use Google Analytics, Google Ads, or a Bing advertising tag.
+          The site does not use Google Analytics, Google Ads, or a Bing advertising tag. Vercel Web
+          Analytics counts page views. It does not set a cookie.
         </p>
       </section>
       <section>

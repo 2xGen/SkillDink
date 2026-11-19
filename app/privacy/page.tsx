@@ -25,6 +25,10 @@ export default function PrivacyPage() {
           <li>A Google account identifier if you choose Google sign-in.</li>
           <li>A purchase record: that your account paid for Pickleball Foundations, and the Stripe checkout reference.</li>
           <li>Messages you send through the contact form, if you include them.</li>
+          <li>
+            Page views of the public site, counted by Vercel Web Analytics. That count does not use
+            a cookie and is not tied to your account.
+          </li>
         </ul>
         <p className="mt-3">
           We do not ask for a playing history, a date of birth, or payment card numbers. Stripe
@@ -38,6 +42,7 @@ export default function PrivacyPage() {
           <li>To know whether that account has bought the course and to open the paid lessons.</li>
           <li>To complete the payment and keep a record of it.</li>
           <li>To reply if you contact us, and to send operational messages about your account or payment.</li>
+          <li>To see which public pages are visited.</li>
         </ul>
         <p className="mt-3">
           The legal bases are performance of the contract (your account and course) and our
@@ -51,6 +56,7 @@ export default function PrivacyPage() {
           <li>Supabase stores the account and the purchase record. The project region is eu-west-2.</li>
           <li>Google handles Google sign-in if you choose it.</li>
           <li>Stripe processes the payment. Stripe is the controller of the card data it collects.</li>
+          <li>Vercel counts page views. It does not receive your account or payment details for that count.</li>
         </ul>
         <p className="mt-3">
           We do not sell your personal information. We do not use it for advertising profiles.

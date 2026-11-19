@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { Analytics } from "@vercel/analytics/next";
 import { Barlow, Inter } from "next/font/google";
 import { CookieBanner } from "@/components/cookie-banner";
 import { HeaderGate } from "@/components/header-gate";
@@ -52,6 +53,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </main>
         <SiteFooter />
         <CookieBanner />
+        <Analytics />
       </body>
     </html>
   );

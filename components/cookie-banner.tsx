@@ -123,9 +123,9 @@ export function CookieBanner() {
                 />
               </div>
               <p className="mt-1 text-sm leading-relaxed text-white/75">
-                SkillDink does not set analytics or advertising cookies. Google Search Console and
-                Bing Webmaster Tools do not place a cookie in your browser. This switch records
-                whether you allow optional cookies.
+                SkillDink does not set analytics or advertising cookies. Page views are counted by
+                Vercel without a cookie. Google Search Console and Bing Webmaster Tools do not place
+                a cookie in your browser. This switch records whether you allow optional cookies.
               </p>
             </div>
           </div>
