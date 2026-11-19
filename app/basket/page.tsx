@@ -35,20 +35,7 @@ export default function BasketPage({
         <span className="px-2 text-forest/30">/</span>
         Checkout
       </p>
-      <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <h1 className="font-display text-5xl italic leading-[0.98] tracking-[-0.03em]">Checkout</h1>
-        <ol className="flex items-center gap-3 text-sm font-semibold" aria-label="Checkout steps">
-          <li className="flex items-center gap-2">
-            <span className="grid size-6 place-items-center rounded-full bg-forest text-xs text-lime">1</span>
-            Review
-          </li>
-          <li className="h-px w-8 bg-forest/20" aria-hidden="true" />
-          <li className="flex items-center gap-2 text-forest/45">
-            <span className="grid size-6 place-items-center rounded-full border border-forest/20 text-xs">2</span>
-            Payment
-          </li>
-        </ol>
-      </div>
+      <h1 className="mt-5 font-display text-5xl italic leading-[0.98] tracking-[-0.03em]">Checkout</h1>
       <Suspense fallback={<div className="mt-8 h-96 rounded-[1.4rem] bg-white" />}>
         <Checkout searchParams={searchParams} />
       </Suspense>
@@ -75,6 +62,9 @@ async function Checkout({
 
   return (
     <div className="mt-8 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_24rem]">
+      <div className="lg:col-span-2">
+        <CheckoutSteps signedIn={Boolean(user)} />
+      </div>
       <section className="rounded-[1.4rem] border border-forest/10 bg-white">
         <div className="flex items-center justify-between border-b border-forest/10 px-5 py-4 sm:px-6">
           <h2 className="text-sm font-bold tracking-[0.12em] uppercase">Your order</h2>
@@ -112,156 +102,227 @@ async function Checkout({
       </section>
 
       <aside className="rounded-[1.4rem] border border-forest/10 bg-white px-5 py-5 sm:px-6 lg:sticky lg:top-24">
-        <h2 className="text-sm font-bold tracking-[0.12em] uppercase">Summary</h2>
-        <dl className="mt-4 space-y-3 text-sm">
-          <div className="flex justify-between gap-4">
-            <dt className="text-forest/65">Subtotal</dt>
-            <dd className="font-semibold tabular-nums">{price}</dd>
-          </div>
-          <div className="flex justify-between gap-4">
-            <dt className="text-forest/65">Access</dt>
-            <dd className="font-semibold">One-time</dd>
-          </div>
-          <div className="flex items-baseline justify-between gap-4 border-t border-forest/10 pt-3">
-            <dt className="font-bold">Total due</dt>
-            <dd className="text-2xl font-bold tracking-tight tabular-nums">{price}</dd>
-          </div>
-          <p className="-mt-1 text-right text-xs font-semibold text-forest/45">USD</p>
-        </dl>
-
-        {user?.email ? (
-          <p className="mt-4 rounded-xl bg-pale px-3 py-2 text-sm text-forest/75">
-            Paying as <span className="font-semibold text-forest">{user.email}</span>
-          </p>
-        ) : null}
-
         {owned ? (
-          <div className="mt-5">
-            <p className="text-sm leading-relaxed text-forest/70">
-              This course is already unlocked on your account.
+          <OwnedCourse />
+        ) : !user ? (
+          <>
+            <h2 className="text-sm font-bold tracking-[0.12em] uppercase">Your account</h2>
+            <p className="mt-4 text-sm leading-relaxed text-forest/75">
+              Pickleball Foundations is <span className="font-semibold text-forest">{price}</span>,
+              paid once. Sign in to pay or use a coach code.
             </p>
-            <ButtonLink href="/learn/what-is-pickleball" className="mt-4 w-full">
-              Continue the course
-              <ArrowIcon />
-            </ButtonLink>
-          </div>
+            <AccountStep />
+          </>
         ) : (
-          <form action={placeOrder} className="mt-5">
-            <label className="flex items-start gap-2.5 text-left text-sm leading-snug text-forest/80">
-              <input
-                type="checkbox"
-                name="terms"
-                required
-                className="mt-0.5 size-4 shrink-0 accent-lime"
-              />
-              <span>
-                I agree to the{" "}
-                <Link href="/terms" className="font-semibold text-forest underline underline-offset-4">
-                  Terms
-                </Link>{" "}
-                and{" "}
-                <Link href="/privacy" className="font-semibold text-forest underline underline-offset-4">
-                  Privacy Policy
-                </Link>
-                . The payment is non-refundable and the course is supplied as-is.
-              </span>
-            </label>
-            {terms === "required" ? (
-              <p className="mt-3 text-sm font-semibold text-court" role="alert">
-                Accept the Terms and Privacy Policy before you pay.
-              </p>
-            ) : null}
-            {checkout === "setup" ? (
-              <p className="mt-3 text-sm font-semibold text-court" role="alert">
-                Checkout is not ready yet. Try again in a moment.
-              </p>
-            ) : null}
-            {checkout === "error" ? (
-              <p className="mt-3 text-sm font-semibold text-court" role="alert">
-                Payment did not start. Try again in a moment.
-              </p>
-            ) : null}
-            <button
-              type="submit"
-              name="intent"
-              value="pay"
-              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-lime px-5 py-3 text-[15px] font-semibold text-forest transition hover:bg-[#b6e62a]"
-            >
-              {user ? `Pay ${price}` : "Log in and pay"}
-              <ArrowIcon />
-            </button>
-            {user ? (
-              <p className="mt-3 text-center text-xs leading-relaxed text-forest/55">
-                Card details are entered on the next page.
-              </p>
-            ) : (
-              <p className="mt-3 text-center text-xs leading-relaxed text-forest/55">
-                You will log in first, then return here to pay.
-              </p>
-            )}
-            <CoachCode
-              defaultCode={savedCode}
-              message={redeemMessage(redeem)}
-              signedIn={Boolean(user)}
-            />
-          </form>
+          <AccessChoice
+            email={user.email}
+            savedCode={savedCode}
+            terms={terms}
+            checkout={checkout}
+            redeem={redeem}
+          />
         )}
-
-        <PaymentMarks className="mt-5 border-t border-forest/10 pt-4" />
       </aside>
     </div>
   );
 }
 
-function CoachCode({
-  defaultCode,
-  message,
-  signedIn,
-}: {
-  defaultCode: string;
-  message?: string;
-  signedIn: boolean;
-}) {
+function CheckoutSteps({ signedIn }: { signedIn: boolean }) {
   return (
-    <details open={Boolean(message || defaultCode)} className="mt-4 border-t border-forest/10 pt-4">
-      <summary className="cursor-pointer list-none text-sm font-semibold [&::-webkit-details-marker]:hidden">
-        <span className="underline decoration-forest/30 underline-offset-4">
-          Have a coach or associate code?
-        </span>
-      </summary>
-      <div className="mt-3">
-        <p className="text-sm leading-relaxed text-forest/65">
-          Redeem it on this account for free access. Each code works for a limited number of
-          accounts.
-        </p>
-        <label className="mt-3 block text-sm font-semibold" htmlFor="coach-code">
-          Code
-          <input
-            id="coach-code"
-            name="code"
-            type="text"
-            defaultValue={defaultCode}
-            autoComplete="off"
-            spellCheck={false}
-            placeholder="Enter code"
-            className="mt-1.5 w-full rounded-2xl border border-forest/15 bg-ivory px-4 py-3 font-normal tracking-wide uppercase outline-none focus:border-forest"
-          />
-        </label>
-        {message ? (
-          <p className="mt-3 text-sm font-semibold text-court" role="alert">
-            {message}
-          </p>
-        ) : null}
-        <button
-          type="submit"
-          name="intent"
-          value="redeem"
-          className="mt-3 inline-flex w-full items-center justify-center rounded-full border border-forest/20 px-5 py-3 text-[15px] font-semibold transition hover:bg-pale"
+    <ol className="flex items-center gap-3 text-sm font-semibold" aria-label="Checkout steps">
+      <li className={`flex items-center gap-2 ${signedIn ? "text-forest/55" : ""}`}>
+        <span
+          className={`grid size-6 place-items-center rounded-full text-xs ${
+            signedIn ? "bg-lime text-forest" : "bg-forest text-lime"
+          }`}
         >
-          {signedIn ? "Redeem free access" : "Log in to redeem"}
-        </button>
+          {signedIn ? "✓" : "1"}
+        </span>
+        Account
+      </li>
+      <li className="h-px w-8 bg-forest/20" aria-hidden="true" />
+      <li className={`flex items-center gap-2 ${signedIn ? "" : "text-forest/45"}`}>
+        <span
+          className={`grid size-6 place-items-center rounded-full text-xs ${
+            signedIn ? "bg-forest text-lime" : "border border-forest/20"
+          }`}
+        >
+          2
+        </span>
+        Get access
+      </li>
+    </ol>
+  );
+}
+
+function OwnedCourse() {
+  return (
+    <>
+      <h2 className="text-sm font-bold tracking-[0.12em] uppercase">Your course</h2>
+      <p className="mt-4 text-sm leading-relaxed text-forest/70">
+        This course is already unlocked on your account.
+      </p>
+      <ButtonLink href="/learn/what-is-pickleball" className="mt-4 w-full">
+        Continue the course
+        <ArrowIcon />
+      </ButtonLink>
+    </>
+  );
+}
+
+function AccessChoice({
+  email,
+  savedCode,
+  terms,
+  checkout,
+  redeem,
+}: {
+  email?: string;
+  savedCode: string;
+  terms?: string;
+  checkout?: string;
+  redeem?: string;
+}) {
+  const message = redeemMessage(redeem);
+
+  return (
+    <>
+      <h2 className="text-sm font-bold tracking-[0.12em] uppercase">Get access</h2>
+      {email ? (
+        <p className="mt-4 text-sm text-forest/75">
+          Signed in as <span className="font-semibold text-forest">{email}</span>
+        </p>
+      ) : null}
+      <form action={placeOrder} className="mt-5">
+        <section className="rounded-2xl bg-pale px-4 py-4">
+          <h3 className="font-bold">Pay {price} once</h3>
+          <p className="mt-1 text-sm leading-relaxed text-forest/70">
+            Your card is entered on the next page. The payment is non-refundable, and the course is
+            supplied as-is.
+          </p>
+          {checkout === "setup" ? (
+            <p className="mt-3 text-sm font-semibold text-court" role="alert">
+              Checkout is not ready yet. Try again in a moment.
+            </p>
+          ) : null}
+          {checkout === "error" ? (
+            <p className="mt-3 text-sm font-semibold text-court" role="alert">
+              Payment did not start. Try again in a moment.
+            </p>
+          ) : null}
+          <TermsAgreement id="terms-pay" required />
+          {terms === "required" ? (
+            <p className="mt-3 text-sm font-semibold text-court" role="alert">
+              Accept the Terms and Privacy Policy to pay.
+            </p>
+          ) : null}
+          <button
+            type="submit"
+            name="intent"
+            value="pay"
+            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-lime px-5 py-3 text-[15px] font-semibold text-forest transition hover:bg-[#b6e62a]"
+          >
+            Pay {price}
+            <ArrowIcon />
+          </button>
+          <PaymentMarks className="mt-4" />
+        </section>
+
+        <p className="my-4 text-center text-xs font-bold tracking-[0.14em] text-forest/45 uppercase">
+          or
+        </p>
+
+        <section>
+          <h3 className="font-bold">Use a coach code</h3>
+          <p className="mt-1 text-sm leading-relaxed text-forest/70">
+            A code from your coach unlocks the course on this account. Each code works for a limited
+            number of accounts.
+          </p>
+          <label className="mt-3 block text-sm font-semibold" htmlFor="coach-code">
+            Code
+            <input
+              id="coach-code"
+              name="code"
+              type="text"
+              defaultValue={savedCode}
+              autoComplete="off"
+              spellCheck={false}
+              placeholder="Enter code"
+              className="mt-1.5 w-full rounded-2xl border border-forest/15 bg-ivory px-4 py-3 font-normal tracking-wide uppercase outline-none focus:border-forest"
+            />
+          </label>
+          {message && redeem !== "terms" ? (
+            <p className="mt-3 text-sm font-semibold text-court" role="alert">
+              {message}
+            </p>
+          ) : null}
+          <TermsAgreement id="terms-code" />
+          {redeem === "terms" ? (
+            <p className="mt-3 text-sm font-semibold text-court" role="alert">
+              Accept the Terms and Privacy Policy to redeem a code.
+            </p>
+          ) : null}
+          <button
+            type="submit"
+            name="intent"
+            value="redeem"
+            formNoValidate
+            className="mt-4 inline-flex w-full items-center justify-center rounded-full border border-forest/20 bg-white px-5 py-3 text-[15px] font-semibold transition hover:bg-pale"
+          >
+            Redeem free access
+          </button>
+        </section>
+      </form>
+    </>
+  );
+}
+
+function TermsAgreement({ id, required = false }: { id: string; required?: boolean }) {
+  return (
+    <label htmlFor={id} className="mt-4 flex items-start gap-2.5 text-left text-sm leading-snug text-forest/80">
+      <input
+        id={id}
+        type="checkbox"
+        name="terms"
+        required={required}
+        className="mt-0.5 size-4 shrink-0 accent-lime"
+      />
+      <span>
+        I agree to the{" "}
+        <Link href="/terms" className="font-semibold text-forest underline underline-offset-4">
+          Terms
+        </Link>{" "}
+        and{" "}
+        <Link href="/privacy" className="font-semibold text-forest underline underline-offset-4">
+          Privacy Policy
+        </Link>
+        .
+      </span>
+    </label>
+  );
+}
+
+function AccountStep() {
+  return (
+    <div className="mt-5">
+      <p className="text-sm leading-relaxed text-forest/75">
+        Create an account or log in. You will come straight back here to finish checkout.
+      </p>
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <Link
+          href="/login?next=/basket&mode=register"
+          className="inline-flex items-center justify-center rounded-full bg-lime px-3 py-3 text-center text-sm font-semibold text-forest hover:bg-[#b6e62a]"
+        >
+          Create an account
+        </Link>
+        <Link
+          href="/login?next=/basket"
+          className="inline-flex items-center justify-center rounded-full border border-forest/80 px-3 py-3 text-center text-sm font-semibold text-forest hover:bg-forest/5"
+        >
+          Log in
+        </Link>
       </div>
-    </details>
+    </div>
   );
 }
 

@@ -8,8 +8,16 @@ import { signInWithEmail, signUpWithEmail } from "@/app/login/actions";
 const fieldClass =
   "mt-1.5 w-full rounded-2xl border border-forest/15 bg-ivory px-4 py-3 font-normal outline-none transition focus:border-forest";
 
-export function LoginForm({ notice, next }: { notice?: string; next?: string }) {
-  const [mode, setMode] = useState<"login" | "register">("login");
+export function LoginForm({
+  notice,
+  next,
+  initialMode = "login",
+}: {
+  notice?: string;
+  next?: string;
+  initialMode?: "login" | "register";
+}) {
+  const [mode, setMode] = useState<"login" | "register">(initialMode);
   const [googlePending, setGooglePending] = useState(false);
   const [googleError, setGoogleError] = useState<string | null>(null);
   const [accepted, setAccepted] = useState(false);
@@ -51,9 +59,13 @@ export function LoginForm({ notice, next }: { notice?: string; next?: string }) 
         {creating ? "Create an account" : "Log in"}
       </h1>
       <p className="mt-3 leading-relaxed text-forest/75">
-        {creating
-          ? "Create an account with Google, or with your name and email."
-          : "Continue with Google, or log in with your email and password."}
+        {next === "/basket"
+          ? creating
+            ? "Create an account, then continue to checkout."
+            : "Log in, then continue to checkout."
+          : creating
+            ? "Create an account with Google, or with your name and email."
+            : "Continue with Google, or log in with your email and password."}
       </p>
       <div className="mt-6 grid grid-cols-2 rounded-full bg-pale p-1" role="tablist" aria-label="Account">
         <ModeButton active={!creating} onClick={() => setMode("login")}>
