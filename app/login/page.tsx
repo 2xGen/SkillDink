@@ -41,7 +41,10 @@ async function LoginPanel({
   searchParams: Promise<{ error?: string | string[] }>;
 }) {
   const user = await getCurrentUser();
-  const { error } = await searchParams;
+  const params = (await searchParams) as { error?: string | string[]; next?: string | string[] };
+  const error = params.error;
+  const next = Array.isArray(params.next) ? params.next[0] : params.next;
+  const destination = next?.startsWith("/") && !next.startsWith("//") ? next : "/learn/what-is-pickleball";
 
   if (user) {
     return (
@@ -54,8 +57,8 @@ async function LoginPanel({
           Signed in as {user.name}
           {user.email ? ` (${user.email})` : ""}.
         </p>
-        <ButtonLink href="/learn/what-is-pickleball" className="mt-6">
-          Continue the course
+        <ButtonLink href={destination} className="mt-6">
+          {destination === "/basket" ? "Return to your basket" : "Continue the course"}
           <ArrowIcon />
         </ButtonLink>
         <form action={signOut} className="mt-4">
@@ -69,7 +72,7 @@ async function LoginPanel({
 
   const code = Array.isArray(error) ? error[0] : error;
 
-  return <LoginForm notice={noticeFor(code)} />;
+  return <LoginForm notice={noticeFor(code)} next={destination === "/learn/what-is-pickleball" && !next ? undefined : destination} />;
 }
 
 function noticeFor(code: string | undefined) {

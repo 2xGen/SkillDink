@@ -1,14 +1,48 @@
 "use client";
 
-import { useActionState, useState } from "react";
-import { signInWithEmail, signInWithGoogle, signUpWithEmail } from "@/app/login/actions";
+import { createBrowserClient } from "@supabase/ssr";
+import Link from "next/link";
+import { useActionState, useEffect, useState } from "react";
+import { signInWithEmail, signUpWithEmail } from "@/app/login/actions";
 
 const fieldClass =
   "mt-1.5 w-full rounded-2xl border border-forest/15 bg-ivory px-4 py-3 font-normal outline-none transition focus:border-forest";
 
-export function LoginForm({ notice }: { notice?: string }) {
+export function LoginForm({ notice, next }: { notice?: string; next?: string }) {
   const [mode, setMode] = useState<"login" | "register">("login");
+  const [googlePending, setGooglePending] = useState(false);
+  const [googleError, setGoogleError] = useState<string | null>(null);
+  const [accepted, setAccepted] = useState(false);
   const creating = mode === "register";
+
+  useEffect(() => {
+    if (!next || !next.startsWith("/") || next.startsWith("//")) return;
+    document.cookie = `skilldink-next=${next}; Path=/; Max-Age=600; SameSite=Lax`;
+  }, [next]);
+
+  async function continueWithGoogle() {
+    if (creating && !accepted) {
+      setGoogleError("Accept the Terms and Privacy Policy to create an account.");
+      return;
+    }
+    setGooglePending(true);
+    setGoogleError(null);
+    if (creating) {
+      document.cookie = "skilldink-terms=1; Path=/; Max-Age=600; SameSite=Lax";
+    }
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    );
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
+    if (error) {
+      setGooglePending(false);
+      setGoogleError("Google sign-in did not start. Try again.");
+    }
+  }
 
   return (
     <div>
@@ -34,21 +68,47 @@ export function LoginForm({ notice }: { notice?: string }) {
           {notice}
         </p>
       ) : null}
-      <form action={signInWithGoogle} className="mt-6">
-        <button
-          type="submit"
-          className="flex w-full items-center justify-center gap-3 rounded-full border border-forest/15 bg-white px-5 py-3 text-[15px] font-semibold text-forest transition hover:bg-pale"
-        >
-          <GoogleMark />
-          Continue with Google
-        </button>
-      </form>
+      {creating ? (
+        <label className="mt-6 flex items-start gap-2.5 text-sm leading-snug">
+          <input
+            type="checkbox"
+            checked={accepted}
+            onChange={(event) => setAccepted(event.target.checked)}
+            className="mt-0.5 size-4 shrink-0 accent-lime"
+          />
+          <span>
+            I agree to the{" "}
+            <Link href="/terms" className="font-semibold underline underline-offset-4">
+              Terms
+            </Link>{" "}
+            and the{" "}
+            <Link href="/privacy" className="font-semibold underline underline-offset-4">
+              Privacy Policy
+            </Link>
+            .
+          </span>
+        </label>
+      ) : null}
+      <button
+        type="button"
+        onClick={continueWithGoogle}
+        disabled={googlePending}
+        className={`${creating ? "mt-4" : "mt-6"} flex w-full items-center justify-center gap-3 rounded-full border border-forest/15 bg-white px-5 py-3 text-[15px] font-semibold text-forest transition hover:bg-pale disabled:opacity-60`}
+      >
+        <GoogleMark />
+        {googlePending ? "Opening Google…" : "Continue with Google"}
+      </button>
+      {googleError ? (
+        <p className="mt-3 rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-800" role="alert">
+          {googleError}
+        </p>
+      ) : null}
       <div className="my-6 flex items-center gap-3">
         <span className="h-px flex-1 bg-forest/10" />
         <span className="text-xs font-bold tracking-[0.12em] text-forest/45 uppercase">or use email</span>
         <span className="h-px flex-1 bg-forest/10" />
       </div>
-      <EmailFields key={mode} mode={mode} />
+      <EmailFields key={mode} mode={mode} accepted={accepted} next={next} />
     </div>
   );
 }
@@ -77,13 +137,23 @@ function ModeButton({
   );
 }
 
-function EmailFields({ mode }: { mode: "login" | "register" }) {
+function EmailFields({
+  mode,
+  accepted,
+  next,
+}: {
+  mode: "login" | "register";
+  accepted: boolean;
+  next?: string;
+}) {
   const creating = mode === "register";
   const action = creating ? signUpWithEmail : signInWithEmail;
   const [state, formAction, pending] = useActionState(action, null);
 
   return (
     <form className="space-y-4" action={formAction}>
+      {next ? <input type="hidden" name="next" value={next} /> : null}
+      {creating ? <input type="hidden" name="terms" value={accepted ? "on" : ""} /> : null}
       {creating ? (
         <label className="block text-sm font-semibold" htmlFor="name">
           Name
@@ -119,7 +189,7 @@ function EmailFields({ mode }: { mode: "login" | "register" }) {
       ) : null}
       <button
         type="submit"
-        disabled={pending}
+        disabled={pending || (creating && !accepted)}
         className="w-full rounded-full bg-lime px-5 py-3 text-[15px] font-semibold text-forest transition hover:bg-[#b6e62a] disabled:opacity-60"
       >
         {pending ? "Please wait…" : creating ? "Create account" : "Log in"}

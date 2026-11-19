@@ -9,18 +9,6 @@ export type AuthFormState = {
   message?: string;
 } | null;
 
-export async function signInWithGoogle() {
-  const supabase = await createClient();
-  const origin = await requestOrigin();
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: { redirectTo: `${origin}/auth/callback` },
-  });
-
-  if (error || !data.url) redirect("/login?error=google");
-  redirect(data.url);
-}
-
 export async function signInWithEmail(
   _previous: AuthFormState,
   formData: FormData,
@@ -34,7 +22,7 @@ export async function signInWithEmail(
   if (error) return { error: friendlyAuthError(error.message) };
 
   await clearDemoCookie();
-  redirect("/learn/what-is-pickleball");
+  redirect(safeNext(formData.get("next")));
 }
 
 export async function signUpWithEmail(
@@ -48,6 +36,9 @@ export async function signUpWithEmail(
   if (name.length < 2) return { error: "Enter your name." };
   if (!email.includes("@")) return { error: "Enter a valid email address." };
   if (password.length < 8) return { error: "Use a password of at least 8 characters." };
+  if (formData.get("terms") !== "on") {
+    return { error: "Accept the Terms and Privacy Policy to create an account." };
+  }
 
   const supabase = await createClient();
   const origin = await requestOrigin();
@@ -56,7 +47,7 @@ export async function signUpWithEmail(
     password,
     options: {
       emailRedirectTo: `${origin}/auth/callback`,
-      data: { full_name: name },
+      data: { full_name: name, terms_accepted_at: new Date().toISOString() },
     },
   });
 
@@ -66,7 +57,7 @@ export async function signUpWithEmail(
   }
   if (data.session) {
     await clearDemoCookie();
-    redirect("/learn/what-is-pickleball");
+    redirect(safeNext(formData.get("next")));
   }
 
   return {
@@ -87,6 +78,12 @@ async function requestOrigin() {
   const proto =
     headerList.get("x-forwarded-proto") ?? (host?.startsWith("localhost") ? "http" : "https");
   return `${proto}://${host}`;
+}
+
+function safeNext(value: FormDataEntryValue | null) {
+  const next = String(value ?? "");
+  if (!next.startsWith("/") || next.startsWith("//")) return "/learn/what-is-pickleball";
+  return next;
 }
 
 function readEmail(formData: FormData) {

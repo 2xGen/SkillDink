@@ -1,6 +1,7 @@
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { unstable_rethrow } from "next/navigation";
 
 export async function createClient() {
   const cookieStore = await cookies();
@@ -18,7 +19,8 @@ export async function createClient() {
             cookiesToSet.forEach(({ name, value, options }) => {
               cookieStore.set(name, value, options);
             });
-          } catch {
+          } catch (error) {
+            unstable_rethrow(error);
             // Server Components cannot write cookies. The proxy refreshes the session.
           }
         },

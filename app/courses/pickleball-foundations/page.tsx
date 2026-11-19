@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { ArrowIcon, ButtonLink } from "@/components/button-link";
+import { CourseOfferButton } from "@/components/buy-course-button";
+import { ArrowIcon } from "@/components/button-link";
 import { Container } from "@/components/container";
 import { Curriculum } from "@/components/curriculum";
 import { CheckIcon } from "@/components/icons";
@@ -13,7 +14,11 @@ export const metadata: Metadata = {
   description: course.pitch,
 };
 
-export default function CoursePage() {
+export default function CoursePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ checkout?: string | string[] }>;
+}) {
   return (
     <Container className="py-8 sm:py-10">
       <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-10">
@@ -73,10 +78,10 @@ export default function CoursePage() {
             </p>
             <p className="mt-3 text-5xl font-bold tracking-tight">${course.price}</p>
             <p className="mt-1 text-sm text-white/70">One-time payment</p>
-            <ButtonLink href="/login" className="mt-5 w-full">
-              Get course access
-              <ArrowIcon />
-            </ButtonLink>
+            <Suspense fallback={null}>
+              <CheckoutNotice searchParams={searchParams} />
+            </Suspense>
+            <CourseOfferButton className="mt-5 w-full" buyLabel="Get course access" />
             <p className="mt-6 text-sm font-bold">What&apos;s included</p>
             <ul className="mt-3 space-y-2.5">
               {course.included.map((item) => (
@@ -96,6 +101,30 @@ export default function CoursePage() {
       </div>
     </Container>
   );
+}
+
+async function CheckoutNotice({
+  searchParams,
+}: {
+  searchParams: Promise<{ checkout?: string | string[] }>;
+}) {
+  const { checkout } = await searchParams;
+  const code = Array.isArray(checkout) ? checkout[0] : checkout;
+  if (code === "setup") {
+    return (
+      <p className="mt-4 text-sm font-semibold text-lime">
+        Checkout is not ready yet. Add the Stripe and Supabase purchase settings, then try again.
+      </p>
+    );
+  }
+  if (code === "error") {
+    return (
+      <p className="mt-4 text-sm font-semibold text-lime">
+        Checkout did not start. Try again in a moment.
+      </p>
+    );
+  }
+  return null;
 }
 
 async function CourseCurriculum() {

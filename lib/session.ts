@@ -1,5 +1,7 @@
 import "server-only";
 import { cache } from "react";
+import { connection } from "next/server";
+import { foundationsSlug } from "@/lib/catalog";
 import { createClient } from "@/lib/supabase/server";
 
 export type CurrentUser = {
@@ -9,6 +11,7 @@ export type CurrentUser = {
 };
 
 export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
+  await connection();
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getUser();
   if (error || !data.user) return null;
@@ -27,10 +30,30 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
   };
 });
 
-/** Signed-in accounts can open the course until checkout records a purchase. */
-export async function hasCourseAccess() {
+const purchaseStatus = cache(async (): Promise<"owned" | "none" | "unavailable"> => {
   const user = await getCurrentUser();
-  return user !== null;
+  if (!user) return "none";
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("purchases")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("course_slug", foundationsSlug)
+    .maybeSingle();
+
+  if (error) return "unavailable";
+  return data ? "owned" : "none";
+});
+
+/** True when this account has a purchase row, from Stripe or a coach code. */
+export async function hasCourseAccess() {
+  return (await purchaseStatus()) === "owned";
+}
+
+/** False when the purchases table cannot be read yet. */
+export async function purchasesConfigured() {
+  return (await purchaseStatus()) !== "unavailable";
 }
 
 function stringValue(value: unknown) {

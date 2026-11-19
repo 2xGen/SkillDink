@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CourseOfferButton } from "@/components/buy-course-button";
 import { ArrowIcon, ButtonLink } from "@/components/button-link";
 import { Container } from "@/components/container";
 import {
@@ -276,10 +277,11 @@ export default function HomePage() {
             <div className="sm:w-60 sm:shrink-0 sm:text-center">
               <p className="text-5xl font-bold tracking-tight">${course.price} USD</p>
               <p className="mt-1 text-sm text-white/70">One-time payment. No subscription.</p>
-              <ButtonLink href="/login" className="mt-4">
-                Get Pickleball Foundations
-                <ArrowIcon />
-              </ButtonLink>
+              <CourseOfferButton
+                className="mt-4"
+                buyLabel="Checkout"
+                href="/courses/pickleball-foundations"
+              />
             </div>
           </div>
           <ul className="mt-6 grid gap-2.5 border-t border-white/15 pt-5 sm:grid-cols-2">

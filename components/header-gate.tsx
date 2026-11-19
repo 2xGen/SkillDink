@@ -1,7 +1,7 @@
 import { SiteHeader } from "@/components/site-header";
-import { hasCourseAccess } from "@/lib/session";
+import { getCurrentUser } from "@/lib/session";
 
 export async function HeaderGate() {
-  const signedIn = await hasCourseAccess();
-  return <SiteHeader signedIn={signedIn} />;
+  const user = await getCurrentUser();
+  return <SiteHeader userName={user?.name ?? null} />;
 }

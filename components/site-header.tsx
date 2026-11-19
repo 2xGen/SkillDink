@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { signOut } from "@/app/login/actions";
 import { ArrowIcon, ButtonLink } from "@/components/button-link";
 import { Logo } from "@/components/logo";
 
@@ -12,7 +11,9 @@ const links = [
   { href: "/about", label: "About" },
 ];
 
-export function SiteHeader({ signedIn = false }: { signedIn?: boolean }) {
+export function SiteHeader({ userName }: { userName?: string | null }) {
+  const accountPending = userName === undefined;
+  const signedIn = Boolean(userName);
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -43,15 +44,10 @@ export function SiteHeader({ signedIn = false }: { signedIn?: boolean }) {
               {link.label}
             </Link>
           ))}
-          {signedIn ? (
-            <form action={signOut}>
-              <button
-                type="submit"
-                className="text-[15px] font-semibold text-forest hover:text-court"
-              >
-                Log out
-              </button>
-            </form>
+          {accountPending ? (
+            <span className="inline-block size-11" aria-hidden="true" />
+          ) : signedIn ? (
+            <ProfileLink />
           ) : (
             <Link
               href="/login"
@@ -65,13 +61,15 @@ export function SiteHeader({ signedIn = false }: { signedIn?: boolean }) {
             <ArrowIcon />
           </ButtonLink>
         </nav>
-        <button
-          type="button"
-          className="grid size-11 place-items-center rounded-full border border-forest md:hidden"
-          aria-expanded={open}
-          aria-controls="mobile-nav"
-          onClick={() => setOpen((value) => !value)}
-        >
+        <div className="flex items-center gap-2 md:hidden">
+          {signedIn ? <ProfileLink /> : null}
+          <button
+            type="button"
+            className="grid size-11 place-items-center rounded-full border border-forest"
+            aria-expanded={open}
+            aria-controls="mobile-nav"
+            onClick={() => setOpen((value) => !value)}
+          >
           <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
           <span className="flex w-4 flex-col gap-1.5" aria-hidden="true">
             <span
@@ -83,6 +81,7 @@ export function SiteHeader({ signedIn = false }: { signedIn?: boolean }) {
             />
           </span>
         </button>
+        </div>
       </div>
       {open ? (
         <nav
@@ -101,15 +100,16 @@ export function SiteHeader({ signedIn = false }: { signedIn?: boolean }) {
                 {link.label}
               </Link>
             ))}
-            {signedIn ? (
-              <form action={signOut}>
-                <button
-                  type="submit"
-                  className="rounded-xl px-2 py-3 text-left text-base font-semibold"
-                >
-                  Log out
-                </button>
-              </form>
+            {accountPending ? (
+              <span className="mx-2 my-3 inline-block h-6 w-28" aria-hidden="true" />
+            ) : signedIn ? (
+              <Link
+                href="/profile"
+                onClick={() => setOpen(false)}
+                className="rounded-xl px-2 py-3 text-base font-semibold"
+              >
+                Profile
+              </Link>
             ) : (
               <Link
                 href="/login"
@@ -131,5 +131,26 @@ export function SiteHeader({ signedIn = false }: { signedIn?: boolean }) {
         </nav>
       ) : null}
     </header>
+  );
+}
+
+function ProfileLink() {
+  return (
+    <Link
+      href="/profile"
+      aria-label="Profile"
+      className="grid size-11 place-items-center rounded-full border border-forest text-forest transition hover:bg-pale"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="size-5">
+        <circle cx="12" cy="8" r="3.25" fill="none" stroke="currentColor" strokeWidth="1.8" />
+        <path
+          d="M5.2 19.25c1.45-3.05 3.9-4.5 6.8-4.5s5.35 1.45 6.8 4.5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
+      </svg>
+    </Link>
   );
 }

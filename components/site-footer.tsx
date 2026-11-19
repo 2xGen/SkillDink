@@ -1,17 +1,21 @@
+import { Suspense } from "react";
 import Link from "next/link";
+import { ManageCookiesButton } from "@/components/cookie-banner";
 import { Container } from "@/components/container";
 import { Logo } from "@/components/logo";
+import { PaymentMarks } from "@/components/payment-marks";
+import { getCurrentUser } from "@/lib/session";
 
 const links = [
   { href: "/courses/pickleball-foundations", label: "The course" },
   { href: "/guides", label: "Free guides" },
   { href: "/about", label: "About" },
-  { href: "/login", label: "Log in" },
 ];
 
 const legal = [
   { href: "/privacy", label: "Privacy" },
   { href: "/terms", label: "Terms" },
+  { href: "/cookies", label: "Cookies" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -34,6 +38,9 @@ export function SiteFooter() {
                 {link.label}
               </Link>
             ))}
+            <Suspense fallback={<AccountPlaceholder />}>
+              <FooterAccount />
+            </Suspense>
           </nav>
           <nav className="flex flex-wrap gap-x-6 gap-y-2" aria-label="Legal">
             {legal.map((link) => (
@@ -45,9 +52,36 @@ export function SiteFooter() {
                 {link.label}
               </Link>
             ))}
+            <ManageCookiesButton className="text-sm font-semibold text-forest/60 hover:text-forest" />
           </nav>
         </div>
       </Container>
+      <Container className="mt-8 border-t border-forest/10 pt-6">
+        <PaymentMarks />
+      </Container>
     </footer>
+  );
+}
+
+function AccountPlaceholder() {
+  return <span className="inline-block h-5 w-16" aria-hidden="true" />;
+}
+
+function AccountLinkFallback() {
+  return (
+    <Link href="/login" className="text-sm font-semibold text-forest/80 hover:text-forest">
+      Log in
+    </Link>
+  );
+}
+
+async function FooterAccount() {
+  const user = await getCurrentUser();
+  if (!user) return <AccountLinkFallback />;
+
+  return (
+    <Link href="/profile" className="text-sm font-semibold text-forest/80 hover:text-forest">
+      Profile
+    </Link>
   );
 }

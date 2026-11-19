@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowIcon, ButtonLink } from "@/components/button-link";
+import { BuyCourseButton } from "@/components/buy-course-button";
 import { CheckIcon } from "@/components/icons";
 import { course, freeLessonSlug } from "@/lib/course";
 
@@ -27,10 +27,7 @@ export function CoursePaywall({
       </p>
       <p className="mt-5 text-5xl font-bold tracking-tight">${course.price}</p>
       <p className="mt-1 text-sm text-white/70">One-time payment. No subscription.</p>
-      <ButtonLink href="/login" className="mt-5">
-        Get Pickleball Foundations
-        <ArrowIcon />
-      </ButtonLink>
+      <BuyCourseButton className="mt-5">Get Pickleball Foundations</BuyCourseButton>
       <ul className="mt-6 space-y-2.5">
         {course.included.map((item) => (
           <li key={item} className="flex gap-2.5 text-sm leading-snug text-white/90">
