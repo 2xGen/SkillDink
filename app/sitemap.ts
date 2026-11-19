@@ -14,6 +14,7 @@ const pages: {
   { path: "/guides", priority: 0.8, changeFrequency: "weekly" },
   { path: `/learn/${freeLessonSlug}`, priority: 0.8, changeFrequency: "monthly" },
   { path: "/about", priority: 0.6, changeFrequency: "monthly" },
+  { path: "/for-coaches", priority: 0.7, changeFrequency: "monthly" },
   { path: "/courses", priority: 0.5, changeFrequency: "monthly" },
   { path: "/contact", priority: 0.5, changeFrequency: "yearly" },
   { path: "/privacy", priority: 0.3, changeFrequency: "yearly" },

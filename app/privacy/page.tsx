@@ -26,6 +26,11 @@ export default function PrivacyPage() {
           <li>A purchase record: that your account paid for Pickleball Foundations, and the Stripe checkout reference.</li>
           <li>Messages you send through the contact form, if you include them.</li>
           <li>
+            Coach, club, and association enquiries: your name, email, organisation, approximate
+            group size, and whether you are asking about group access, coach education, or a
+            collaboration.
+          </li>
+          <li>
             Page views of the public site, counted by Vercel Web Analytics. That count does not use
             a cookie and is not tied to your account.
           </li>
@@ -42,6 +47,7 @@ export default function PrivacyPage() {
           <li>To know whether that account has bought the course and to open the paid lessons.</li>
           <li>To complete the payment and keep a record of it.</li>
           <li>To reply if you contact us, and to send operational messages about your account or payment.</li>
+          <li>To reply to coaches, clubs, and associations about group access or future resources.</li>
           <li>To see which public pages are visited.</li>
         </ul>
         <p className="mt-3">

@@ -9,6 +9,7 @@ import { getCurrentUser } from "@/lib/session";
 const links = [
   { href: "/courses/pickleball-foundations", label: "The course" },
   { href: "/guides", label: "Free guides" },
+  { href: "/for-coaches", label: "For coaches & clubs" },
   { href: "/about", label: "About" },
 ];
 
