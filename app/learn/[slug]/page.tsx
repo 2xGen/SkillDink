@@ -401,16 +401,16 @@ async function LessonContent({ params }: LessonPageProps) {
               </Link>
             </p>
           ) : null}
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-8 flex flex-col-reverse items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
             {previous ? (
-              <ButtonLink href={`/learn/${previous.slug}`} variant="outline">
-                <ArrowIcon className="rotate-180" />
+              <ButtonLink href={`/learn/${previous.slug}`} variant="outline" size="sm">
+                <ArrowIcon className="size-3.5 rotate-180 sm:size-4" />
                 Previous lesson
               </ButtonLink>
             ) : (
               <span />
             )}
-            <ButtonLink href={continueHref}>
+            <ButtonLink href={continueHref} className="w-full sm:w-auto">
               {next ? "Mark complete and continue" : "Continue to the assessment"}
               <ArrowIcon />
             </ButtonLink>

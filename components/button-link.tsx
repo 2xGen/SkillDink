@@ -4,6 +4,7 @@ type ButtonLinkProps = {
   href: string;
   children: React.ReactNode;
   variant?: "primary" | "outline";
+  size?: "md" | "sm";
   className?: string;
   onClick?: () => void;
 };
@@ -27,6 +28,7 @@ export function ButtonLink({
   href,
   children,
   variant = "primary",
+  size = "md",
   className = "",
   onClick,
 }: ButtonLinkProps) {
@@ -34,12 +36,16 @@ export function ButtonLink({
     variant === "primary"
       ? "bg-lime text-forest hover:bg-[#b6e62a]"
       : "border border-forest/80 bg-transparent text-forest hover:bg-forest/5";
+  const sizing =
+    size === "sm"
+      ? "w-fit px-3.5 py-1.5 text-sm sm:px-5 sm:py-3 sm:text-[15px]"
+      : "px-5 py-3 text-[15px]";
 
   return (
     <Link
       href={href}
       onClick={onClick}
-      className={`inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-[15px] font-semibold transition ${styles} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-full font-semibold transition ${sizing} ${styles} ${className}`}
     >
       {children}
     </Link>
